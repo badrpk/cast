@@ -15,3 +15,13 @@ git clone https://github.com/badrpk/cast.git
 ```
 
 See [COMMUNITY.md](COMMUNITY.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Download & contribute
+
+```bash
+git clone https://github.com/badrpk/cast.git
+cd cast
+# see package.json / Dockerfile for run options
+```
+
+Public open source — [COMMUNITY.md](COMMUNITY.md) · [CONTRIBUTING.md](CONTRIBUTING.md)

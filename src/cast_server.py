@@ -5,6 +5,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from http_util import JsonAPI, serve, uid, iso
 import payments as pay
+import auth as authmod
 
 DEVICES = [
     {"id": "tv1", "name": "Living Room TV", "protocol": "chromecast", "ip": "192.168.1.20", "online": True, "model": "Chromecast HD"},
@@ -16,10 +17,15 @@ SESSIONS, GROUPS, QUEUES = {}, {}, {}
 
 class H(JsonAPI):
     def do_GET(self):
+        _path_early = (self.path.split("?")[0].rstrip("/") or "/")
+        if _path_early.startswith("/auth"):
+            hdrs = {k: v for k, v in self.headers.items()}
+            code, body = authmod.handle_auth_request("GET", _path_early, {}, hdrs, product="cast")
+            return self._send(code, body)
         path, q = self.parse()
         if path in ("/", "/health"):
             return self._send(200, {"ok": True, "service": "cast", "version": "3.0.0",
-                "gaps_closed": ["multi_room_groups", "queue", "pro_billing", "stripe"]})
+                "gaps_closed": ["multi_room_groups", "queue", "pro_billing", "stripe", "signup", "login", "otp", "oauth_google", "oauth_facebook"]})
         if path == "/capabilities":
             return self._send(200, {"ok": True, "competitor": "Google Cast / AirPlay",
                 "features": ["discovery","session","media","queue","groups","mirror","billing","stripe"]})
@@ -40,6 +46,12 @@ class H(JsonAPI):
         self._send(404, {"ok": False})
 
     def do_POST(self):
+        _path_early = (self.path.split("?")[0].rstrip("/") or "/")
+        if _path_early.startswith("/auth"):
+            hdrs = {k: v for k, v in self.headers.items()}
+            body = self._read_json() if hasattr(self, "_read_json") else self._read()
+            code, resp = authmod.handle_auth_request("POST", _path_early, body if isinstance(body, dict) else {}, hdrs, product="cast")
+            return self._send(code, resp)
         path, _ = self.parse()
         body = self._read_json()
         if path == "/sessions":

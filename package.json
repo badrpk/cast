@@ -1,0 +1,1 @@
+{"name":"cast","version":"2.0.0","scripts":{"start":"python3 src/cast_server.py","server":"python3 src/cast_server.py"}}
